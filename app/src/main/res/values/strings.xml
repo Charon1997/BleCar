@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">BleCarNMID</string>
+    <string name="toolbar_text">蓝牙</string>
+    <string name="open_scanabled">开放检测</string>
+    <string name="open_remark">仅让已配对的设备检测到</string>
+    <string name="connected">已配对的设备</string>
+    <string name="enabledDevice">可用设备</string>
+    <string name="search">搜索设备</string>
+    <string name="more">更多</string>
+</resources>
