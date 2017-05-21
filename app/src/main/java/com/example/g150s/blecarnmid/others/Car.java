@@ -7,11 +7,21 @@ package com.example.g150s.blecarnmid.others;
 public class Car {
 
     private String carName;
+    private String carAddress;
 
-    public Car(String carName)
-    {
-           this.carName = carName;
+    public Car(String carName, String carMac) {
+        this.carName = carName;
+        this.carAddress = carMac;
     }
+
+    public String getCarAddress() {
+        return carAddress;
+    }
+
+    public void setCarAddress(String carMac) {
+        this.carAddress = carMac;
+    }
+
     public void setCarName(String name)
     {
         carName = name;

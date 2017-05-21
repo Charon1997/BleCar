@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="50dp"
     android:orientation="horizontal"
+    android:background="@color/white"
     >
     <ImageView
         android:layout_width="26dp"
