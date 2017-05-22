@@ -34,6 +34,8 @@ import android.widget.Toast;
 
 import com.example.g150s.blecarnmid.R;
 import com.example.g150s.blecarnmid.others.Car;
+import com.example.g150s.blecarnmid.others.OnConnectItemClickListener;
+import com.example.g150s.blecarnmid.others.OnSearchingItemClickListener;
 import com.example.g150s.blecarnmid.ui.adapter.ConnectedRLAdapter;
 import com.example.g150s.blecarnmid.ui.adapter.SearchingRlAdapter;
 import com.example.g150s.blecarnmid.ui.base.BaseActivity;
@@ -338,12 +340,13 @@ public class MainActivity extends BaseActivity {
         connectedRL.setHasFixedSize(true);
         connectedRLAdapter = new ConnectedRLAdapter(getApplicationContext(),mConnectBluetoothList);
         connectedRL.setAdapter(connectedRLAdapter);
-        connectedRLAdapter.setOnItemClickListener(new ConnectedRLAdapter.OnConnectItemClickListener() {
+        connectedRLAdapter.setOnItemClickListener(new OnConnectItemClickListener() {
             @Override
-            public void onItemClick(View view, Car device) {
-                showConnectDialog(device.getCarName(),device.getCarAddress());
+            public void onItemClick(View view, Car car) {
+                showConnectDialog(car.getCarName(),car.getCarAddress());
             }
         });
+
         /*
         connectedRL.setItemAnimator(new DefaultItemAnimator());
         */
@@ -355,14 +358,14 @@ public class MainActivity extends BaseActivity {
         searchingRL.setLayoutManager(searchingLayoutManager);
         searchingRL.setHasFixedSize(true);
         searchingRlAdapter = new SearchingRlAdapter(getApplicationContext(), mSearchBluetoothList);
-        searchingRlAdapter.setOnItemClickListener(new SearchingRlAdapter.OnSearchingItemClickListener() {
+        searchingRlAdapter.setOnItemClickListener(new OnSearchingItemClickListener() {
             @Override
             public void onItemClick(View view, BluetoothDevice device, int position) {
                 Toast.makeText(MainActivity.this, "名字：" + device.getName() + "地址：" + device.getAddress(), Toast.LENGTH_SHORT).show();
                 showNormalDialog(device.getName(),device.getAddress(),position);
-
             }
         });
+
         searchingRL.setAdapter(searchingRlAdapter);
     }
 
@@ -517,7 +520,7 @@ public class MainActivity extends BaseActivity {
     private void showConnectDialog(final String name, final String address){
         final AlertDialog.Builder normalDialog =
                 new AlertDialog.Builder(MainActivity.this);
-        normalDialog.setIcon(R.drawable.ble_weclome_img);
+        normalDialog.setIcon(R.drawable.car);
         normalDialog.setTitle("连接小车");
         normalDialog.setMessage("是否连接小车"+name);
         normalDialog.setPositiveButton("确定",

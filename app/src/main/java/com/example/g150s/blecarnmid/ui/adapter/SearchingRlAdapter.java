@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.example.g150s.blecarnmid.R;
 import com.example.g150s.blecarnmid.others.Car;
+import com.example.g150s.blecarnmid.others.OnSearchingItemClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.List;
  * Created by G150S on 2017/3/15.
  */
 
-public class SearchingRlAdapter extends RecyclerView.Adapter<SearchingRlAdapter.ViewHolder>  implements View.OnClickListener{
+public class SearchingRlAdapter extends RecyclerView.Adapter<SearchingRlAdapter.ViewHolder>  implements OnSearchingItemClickListener{
     private List<BluetoothDevice> mBluelist;
     private LayoutInflater layoutInflater;
     private OnSearchingItemClickListener mOnItemClickListener = null;
@@ -33,16 +34,21 @@ public class SearchingRlAdapter extends RecyclerView.Adapter<SearchingRlAdapter.
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.searching_adapter_view,parent,false);
         ViewHolder viewHolder = new ViewHolder(view);
-        view.setOnClickListener(this);
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, final int position) {
       /*  holder.searchingDeviceName.setText(mSearchCars.get(position).getCarName());
         holder.itemView.setTag(mSearchCars.get(position));*/
         holder.searchingDeviceName.setText(mBluelist.get(position).getName());
         holder.searchingDeviceAddress.setText(mBluelist.get(position).getAddress());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onItemClick(v,mBluelist.get(position),position);
+            }
+        });
     }
 
     @Override
@@ -54,16 +60,18 @@ public class SearchingRlAdapter extends RecyclerView.Adapter<SearchingRlAdapter.
         mBluelist.clear();
     }
 
+
+
     @Override
-    public void onClick(View v) {
+    public void onItemClick(View view, BluetoothDevice device, int position) {
         if (mOnItemClickListener != null)
         {
             //bug!!!得不到position
-            mOnItemClickListener.onItemClick(v,mBluelist.get(v.getVerticalScrollbarPosition()),v.getVerticalScrollbarPosition());2
+            mOnItemClickListener.onItemClick(view, device, position);
         }
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder
+    static class ViewHolder extends RecyclerView.ViewHolder
     {
         private TextView searchingDeviceName,searchingDeviceAddress;
         ViewHolder(View view)
@@ -89,9 +97,8 @@ public class SearchingRlAdapter extends RecyclerView.Adapter<SearchingRlAdapter.
 //        mSearchCars.remove(position);
 //        notifyItemRemoved(position);
 //    }
-    public static interface OnSearchingItemClickListener{
-        void onItemClick(View view,BluetoothDevice device,int position);
-    }
+
+
 
     public boolean isEmpty() {
         return mBluelist.isEmpty();

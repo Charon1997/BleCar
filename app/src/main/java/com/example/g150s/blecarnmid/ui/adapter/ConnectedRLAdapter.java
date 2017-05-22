@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 import com.example.g150s.blecarnmid.R;
 import com.example.g150s.blecarnmid.others.Car;
+import com.example.g150s.blecarnmid.others.OnConnectItemClickListener;
+import com.example.g150s.blecarnmid.others.OnSearchingItemClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,7 @@ import java.util.List;
  * Created by G150S on 2017/3/14.
  */
 
-public class ConnectedRLAdapter extends RecyclerView.Adapter<ConnectedRLAdapter.ViewHolder> implements View.OnClickListener {
+public class ConnectedRLAdapter extends RecyclerView.Adapter<ConnectedRLAdapter.ViewHolder> implements OnConnectItemClickListener {
     Context mContext;
     private List<Car> mBluelist = new ArrayList<>();
     private OnConnectItemClickListener mOnItemClickListener = null;
@@ -34,7 +36,6 @@ public class ConnectedRLAdapter extends RecyclerView.Adapter<ConnectedRLAdapter.
     public ConnectedRLAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.connected_adapter_view, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
-
         return viewHolder;
     }
 
@@ -47,6 +48,12 @@ public class ConnectedRLAdapter extends RecyclerView.Adapter<ConnectedRLAdapter.
             }
         });
         holder.deviceName.setText(mBluelist.get(position).getCarName());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onItemClick(v,mBluelist.get(position));
+            }
+        });
     }
 
     @Override
@@ -54,7 +61,14 @@ public class ConnectedRLAdapter extends RecyclerView.Adapter<ConnectedRLAdapter.
         return mBluelist.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    @Override
+    public void onItemClick(View view, Car car) {
+        if (mOnItemClickListener != null) {
+            mOnItemClickListener.onItemClick(view,car);
+        }
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
         private TextView deviceName;
         private ImageView detailImg;
 
@@ -83,18 +97,9 @@ public class ConnectedRLAdapter extends RecyclerView.Adapter<ConnectedRLAdapter.
         return mBluelist.isEmpty();
     }
 
-    public static interface OnConnectItemClickListener {
-        void onItemClick(View view, Car device);
-    }
 
-    public void setOnItemClickListener(ConnectedRLAdapter.OnConnectItemClickListener onItemClickListener) {
+
+    public void setOnItemClickListener(OnConnectItemClickListener onItemClickListener) {
         this.mOnItemClickListener = onItemClickListener;
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (mOnItemClickListener != null) {
-            mOnItemClickListener.onItemClick(v, mBluelist.get(v.getVerticalScrollbarPosition()));
-        }
     }
 }
