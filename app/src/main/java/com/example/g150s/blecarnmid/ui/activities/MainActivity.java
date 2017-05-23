@@ -25,15 +25,22 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.g150s.blecarnmid.R;
 import com.example.g150s.blecarnmid.others.Car;
+import com.example.g150s.blecarnmid.others.OnConnectCreateContextMenu;
 import com.example.g150s.blecarnmid.others.OnConnectItemClickListener;
 import com.example.g150s.blecarnmid.others.OnSearchingItemClickListener;
 import com.example.g150s.blecarnmid.ui.adapter.ConnectedRLAdapter;
@@ -51,7 +58,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements OnConnectCreateContextMenu, MenuItem.OnMenuItemClickListener {
     private List<BluetoothDevice> mSearchBluetoothList = new ArrayList<>();
     private List<Car> mConnectBluetoothList = new ArrayList<>();
 
@@ -64,7 +71,7 @@ public class MainActivity extends BaseActivity {
     final int msg2 = 102;
     final int msg3 = 103;
     final int msg4 = 104;
-    int bleId = 0;
+    public int bleId = 0;
 
     private Timer timer;
     private TimerTask timerTask;
@@ -91,6 +98,8 @@ public class MainActivity extends BaseActivity {
     private TextView remarkText;
 
     private ContentLoadingProgressBar progressBar;
+
+    private LinearLayout searchLinear;
 
     private RecyclerView connectedRL;
     private RecyclerView.LayoutManager connectedLayoutManager;
@@ -130,10 +139,11 @@ public class MainActivity extends BaseActivity {
         }
         mConnectBluetoothList.clear();
         spre= getSharedPreferences("myPref", MODE_PRIVATE);
-        if (spre.getInt("Id", 0) != 0) {
-            for(int i = 1;i <= spre.getInt("Id",0);i++) {
-                Log.d(TAG,"bleId" + spre.getInt("Id", 0));
-                Car car = new Car(spre.getString("Name"+i,"ErrorName"),spre.getString("Address"+i,"ErrorAddress"));
+        bleId = spre.getInt("Id", 0);
+        if (bleId != 0) {
+            for(int i = 1;i <= bleId;i++) {
+                Log.d(TAG,"bleId" + bleId);
+                Car car = new Car(spre.getString("Name"+i,"未命名"),spre.getString("Address"+i,"ErrorAddress"));
                 mConnectBluetoothList.add(car);
             }
         }
@@ -217,9 +227,9 @@ public class MainActivity extends BaseActivity {
             noSearch.setVisibility(View.GONE);
         }
 
-        initBleButton();
+        //initBleButton();
 
-        initEnable();
+        //initEnable();
 
         initSearch();
     }
@@ -318,7 +328,8 @@ public class MainActivity extends BaseActivity {
         searchText = (TextView) findViewById(R.id.search_text);
         searchIMG = (ImageView) findViewById(R.id.searchIMG);
         moreIMG = (ImageView) findViewById(R.id.moreIMG);
-        remarkText = (TextView) findViewById(R.id.remark);
+        //remarkText = (TextView) findViewById(R.id.remark);
+        searchLinear = (LinearLayout) findViewById(R.id.search_linear);
     }
 
     private void initToolbar() {
@@ -346,7 +357,7 @@ public class MainActivity extends BaseActivity {
                 showConnectDialog(car.getCarName(),car.getCarAddress());
             }
         });
-
+        connectedRLAdapter.setOnCreateContextMenuListener(this);
         /*
         connectedRL.setItemAnimator(new DefaultItemAnimator());
         */
@@ -371,7 +382,7 @@ public class MainActivity extends BaseActivity {
 
     private void initBleButton() {
         //可以不用此操作
-        bleButton = (JellyToggleButton) findViewById(R.id.ble_turn);
+        //bleButton = (JellyToggleButton) findViewById(R.id.ble_turn);
         bleButton.setJelly(Jelly.ITSELF);
         bleButton.setLeftBackgroundColor(Color.parseColor("gray"));
         bleButton.setOnStateChangeListener(new JellyToggleButton.OnStateChangeListener() {
@@ -406,7 +417,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void initEnable() {
-        scanEnabled = (JellyToggleButton) findViewById(R.id.enable_btn);
+        //scanEnabled = (JellyToggleButton) findViewById(R.id.enable_btn);
         scanEnabled.setJelly(Jelly.ITSELF);
         scanEnabled.setLeftBackgroundColor(Color.parseColor("gray"));
         scanEnabled.setOnStateChangeListener(new JellyToggleButton.OnStateChangeListener() {
@@ -442,7 +453,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void initSearch() {
-        searchIMG.setOnClickListener(new View.OnClickListener() {
+        searchLinear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -540,16 +551,100 @@ public class MainActivity extends BaseActivity {
         // 显示
         normalDialog.show();
     }
+
+    public void showEditDialog(final String name, Context mContext, final int id){
+
+        AlertDialog.Builder editDialog = new AlertDialog.Builder(mContext);
+        final EditText editText = new EditText(mContext);
+        editText.setText(name);
+
+        editDialog.setView(editText);
+        editDialog.setIcon(R.drawable.car);
+        editDialog.setTitle("修改设备名字");
+        editDialog.setPositiveButton("确定",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //...修改小车名字
+                        if (!spre.getString("Name" + id, "ERROR").equals(editText.getText().toString())) {
+                            SharedPreferences.Editor editor = spre.edit();
+                            editor.putString("Name" + id, editText.getText().toString()).apply();
+
+                            mConnectBluetoothList.get(id-1).setCarName(editText.getText().toString());
+                            connectedRLAdapter.notifyDataSetChanged();
+                        }
+                    }
+                });
+        editDialog.setNegativeButton("关闭",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+        // 显示
+        AlertDialog dlg = editDialog.create();
+        dlg.show();
+    }
+
     private boolean checkAddress(String address){
         if (bleId != 0){
-            for (int i = 1;i<=bleId;i++){
-                Log.d(TAG, address + spre.getString("Address" + i, "none"));
-                if (address.equals(spre.getString("Address"+i,"none")) ){
+            for (int i = 0;i< bleId;i++){
+                Log.d(TAG, address + spre.getString("Address" + 0, "none"));
+                if (address.equals(mConnectBluetoothList.get(i).getCarAddress()) ){
                     Toast.makeText(this, "已经添加该设备", Toast.LENGTH_SHORT).show();
                     return true;
                 }
             }
         }
         return false;
+    }
+
+
+    @Override
+    public void onItemCreateContextMenu(ContextMenu menu,int position) {
+        Log.d("123", "oncreat");
+        connectedRLAdapter.setPosition1(position);
+        MenuItem edit = menu.add(0, 1, 0, "编辑");
+        MenuItem delete = menu.add(0, 2, 0, "删除");
+        edit.setOnMenuItemClickListener(this);
+        delete.setOnMenuItemClickListener(this);
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        int position = -1;
+        position = connectedRLAdapter.getPosition1();
+        Log.d("123", "点击了" + position);
+        if (position >= 0) {
+            switch (item.getItemId()) {
+                case 1:
+                    showEditDialog(connectedRLAdapter.getName(position),MainActivity.this,position+1);
+                    break;
+                case 2:
+                    //mainActivity.toDelete(position);
+                    deleteItem(position+1);
+
+
+
+                    break;
+            }
+        }
+        return true;
+    }
+
+    private void deleteItem(int id) {
+        //mConnectBluetoothList.remove(id-1);
+        int size = mConnectBluetoothList.size();
+        int oldId = id + 1;
+        int newId = id ;
+        SharedPreferences.Editor editor = spre.edit();
+        connectedRLAdapter.removeItem(id-1);
+        bleId--;
+        for (; newId < size; newId++, oldId++) {
+            editor.putString("Name" + newId, spre.getString("Name" + oldId, "error" + oldId));
+            editor.putString("Address" + newId, spre.getString("Address" + oldId, "error" + oldId));
+            editor.apply();
+        }
+        editor.putInt("Id", bleId).commit();
     }
 }

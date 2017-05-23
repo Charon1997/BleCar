@@ -40,7 +40,7 @@
         android:layout_below="@id/septal_line"
         android:orientation="vertical"
         >
-        <RelativeLayout
+        <!--<RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:orientation="horizontal"
@@ -116,6 +116,7 @@
                 app:jtbDuration="300"
                 />
         </RelativeLayout>
+        -->
         <TextView
             android:id="@+id/septal_line3"
             android:layout_width="match_parent"
@@ -203,6 +204,7 @@
             android:layout_marginBottom="2dp"
             >
             <LinearLayout
+                android:id="@+id/search_linear"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
