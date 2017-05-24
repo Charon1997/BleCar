@@ -19,22 +19,17 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,7 +46,6 @@ import com.nightonke.jellytogglebutton.JellyToggleButton;
 import com.nightonke.jellytogglebutton.JellyTypes.Jelly;
 import com.nightonke.jellytogglebutton.State;
 
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,10 +56,18 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
     private List<BluetoothDevice> mSearchBluetoothList = new ArrayList<>();
     private List<Car> mConnectBluetoothList = new ArrayList<>();
 
+
     private static final int TIMEENABLED = 120;
     private static final int SEARCHTIME = 15;
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 530;
     private static final int SCAN_PERIOD = 15000;
+
+    public final static String ADDRESS = "Address";
+    public final static String ID = "Id";
+    public final static String NAME = "Name";
+    public final static String SPRE = "myPref";
+    private final static String TAG = MainActivity.class.getSimpleName();
+
 
     final int msg1 = 101;
     final int msg2 = 102;
@@ -120,7 +122,7 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
     //请求启用蓝牙请求码
     private static final int REQUEST_ENABLE_BT = 1;
 
-    private final static String TAG = MainActivity.class.getSimpleName();
+
 
     /**
      * 1.在开机引导页判断用户手机是否支持蓝牙4.0
@@ -138,12 +140,12 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
         mConnectBluetoothList.clear();
-        spre= getSharedPreferences("myPref", MODE_PRIVATE);
-        bleId = spre.getInt("Id", 0);
+        spre= getSharedPreferences(SPRE, MODE_PRIVATE);
+        bleId = spre.getInt(ID, 0);
         if (bleId != 0) {
             for(int i = 1;i <= bleId;i++) {
                 Log.d(TAG,"bleId" + bleId);
-                Car car = new Car(spre.getString("Name"+i,"未命名"),spre.getString("Address"+i,"ErrorAddress"));
+                Car car = new Car(spre.getString(NAME+i,"未命名"),spre.getString(ADDRESS+i,"ErrorAddress"));
                 mConnectBluetoothList.add(car);
             }
         }
@@ -492,7 +494,6 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
             }
         });
     }
-
     private void showNormalDialog(final String name, final String address,final int position){
         final AlertDialog.Builder normalDialog =
                 new AlertDialog.Builder(MainActivity.this);
@@ -508,9 +509,9 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
                             bleId++;
                             Log.d("123", bleId+"scan");
                             SharedPreferences.Editor editor = spre.edit();
-                            editor.putString("Name"+bleId, name);
-                            editor.putString("Address"+bleId, address);
-                            editor.putInt("Id", bleId);
+                            editor.putString(NAME+bleId, name);
+                            editor.putString(ADDRESS+bleId, address);
+                            editor.putInt(ID, bleId);
                             editor.apply();
                             connectedRLAdapter.addItem(name,address);
                             mSearchBluetoothList.remove(position);
@@ -528,6 +529,7 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
         normalDialog.show();
     }
 
+    //连接小车
     private void showConnectDialog(final String name, final String address){
         final AlertDialog.Builder normalDialog =
                 new AlertDialog.Builder(MainActivity.this);
@@ -539,7 +541,17 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //...连接小车
-
+                        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+                            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                        } else {
+                            Intent intent = new Intent(MainActivity.this, ControlActivity.class);
+                            Bundle bundle = new Bundle();
+                            bundle.putString(ADDRESS, address);
+                            bundle.putString(NAME,name);
+                            intent.putExtras(bundle);
+                            startActivity(intent);
+                        }
                     }
                 });
         normalDialog.setNegativeButton("关闭",
@@ -552,6 +564,7 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
         normalDialog.show();
     }
 
+    //编辑小车名字
     public void showEditDialog(final String name, Context mContext, final int id){
 
         AlertDialog.Builder editDialog = new AlertDialog.Builder(mContext);
@@ -566,9 +579,9 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //...修改小车名字
-                        if (!spre.getString("Name" + id, "ERROR").equals(editText.getText().toString())) {
+                        if (!spre.getString(NAME + id, "ERROR").equals(editText.getText().toString())) {
                             SharedPreferences.Editor editor = spre.edit();
-                            editor.putString("Name" + id, editText.getText().toString()).apply();
+                            editor.putString(NAME + id, editText.getText().toString()).apply();
 
                             mConnectBluetoothList.get(id-1).setCarName(editText.getText().toString());
                             connectedRLAdapter.notifyDataSetChanged();
@@ -589,7 +602,7 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
     private boolean checkAddress(String address){
         if (bleId != 0){
             for (int i = 0;i< bleId;i++){
-                Log.d(TAG, address + spre.getString("Address" + 0, "none"));
+                Log.d(TAG, address + spre.getString(ADDRESS + 0, "none"));
                 if (address.equals(mConnectBluetoothList.get(i).getCarAddress()) ){
                     Toast.makeText(this, "已经添加该设备", Toast.LENGTH_SHORT).show();
                     return true;
@@ -598,7 +611,6 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
         }
         return false;
     }
-
 
     @Override
     public void onItemCreateContextMenu(ContextMenu menu,int position) {
@@ -641,10 +653,11 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
         connectedRLAdapter.removeItem(id-1);
         bleId--;
         for (; newId < size; newId++, oldId++) {
-            editor.putString("Name" + newId, spre.getString("Name" + oldId, "error" + oldId));
-            editor.putString("Address" + newId, spre.getString("Address" + oldId, "error" + oldId));
+            editor.putString(NAME+ newId, spre.getString(NAME + oldId, "error" + oldId));
+            editor.putString(ADDRESS + newId, spre.getString(ADDRESS + oldId, "error" + oldId));
             editor.apply();
         }
         editor.putInt("Id", bleId).commit();
     }
+
 }

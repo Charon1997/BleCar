@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -17,6 +18,8 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
+
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/5/21.
@@ -127,6 +130,14 @@ public class BluetoothLeService extends Service {
         return true;
     }
 
+    public void disconnect() {
+        if (mBluetoothAdapter == null) {
+            Log.w(TAG, "BluetoothAdapter not initialized");
+            return;
+        }
+        mBluetoothGatt.disconnect();
+    }
+
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {//5
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status,
@@ -141,6 +152,7 @@ public class BluetoothLeService extends Service {
                 // Attempts to discover services after successful connection.
                 Log.i(TAG, "Attempting to start service discovery:"
                         + mBluetoothGatt.discoverServices());
+                gatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {//当设备无法连接
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;
@@ -148,6 +160,8 @@ public class BluetoothLeService extends Service {
                 broadcastUpdate(intentAction);   //发送广播
             }
         }
+
+
 
         @Override
         // 发现新服务端
@@ -197,5 +211,19 @@ public class BluetoothLeService extends Service {
     private void broadcastUpdate(final String action) {//9发送广播
         final Intent intent = new Intent(action);
         sendBroadcast(intent);//广播
+    }
+
+    public List<BluetoothGattService> getSupportedGattServices() {
+        if (mBluetoothGatt == null)
+            return null;
+
+        return mBluetoothGatt.getServices();
+    }
+    public void writeCharacteristic(BluetoothGattCharacteristic characteristic) {
+
+        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+            Log.w(TAG, "BluetoothAdapter not initialized");
+            return;
+        } else mBluetoothGatt.writeCharacteristic(characteristic);
     }
 }

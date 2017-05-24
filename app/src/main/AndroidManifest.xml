@@ -27,6 +27,7 @@
         <activity android:name=".ui.activities.MainActivity"/>
 
         <service android:name=".ble.BluetoothLeService" android:enabled="true"/>
+        <activity android:name=".ui.activities.ControlActivity"/>
 
     </application>
 

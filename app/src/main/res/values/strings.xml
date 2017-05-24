@@ -7,4 +7,6 @@
     <string name="enabledDevice">可用设备</string>
     <string name="search">搜索设备</string>
     <string name="more">更多</string>
+    <string name="menu_disconnect">断开</string>
+    <string name="menu_connecting">连接</string>
 </resources>
