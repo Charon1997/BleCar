@@ -19,6 +19,8 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
+import com.example.g150s.blecarnmid.ui.activities.ControlActivity;
+
 import java.util.List;
 
 /**
@@ -45,6 +47,7 @@ public class BluetoothLeService extends Service {
     public final static String READ_RSSI = "com.charon.www.NewBluetooth.READ_RSSI";
 
     private final static String TAG = BluetoothLeService.class.getSimpleName();
+    private ControlActivity controlActivity = new ControlActivity();
 
     private final IBinder mBinder = new LocalBinder();
     @Nullable
@@ -90,8 +93,11 @@ public class BluetoothLeService extends Service {
         }
         return true;
     }
+
+
     public boolean connect(final String address) {//4
         Log.d("123", "连接" + mBluetoothDeviceAddress);
+        //controlActivity.invalidateOptionsMenu();
         if (mBluetoothAdapter == null || address == null) {
             Log.d("123",
                     "BluetoothAdapter不能初始化 or 未知 address.");
@@ -135,6 +141,7 @@ public class BluetoothLeService extends Service {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
+        //controlActivity.invalidateOptionsMenu();
         mBluetoothGatt.disconnect();
     }
 
