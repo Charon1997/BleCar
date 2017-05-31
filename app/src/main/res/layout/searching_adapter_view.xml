@@ -17,12 +17,13 @@
         android:id="@+id/searching_device_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="BleDevice"
+        android:text="BleDeviceBleDeviceBleDeviceBleDevice"
         android:textSize="16sp"
         android:textColor="@color/black"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_gravity="center_vertical"
+        android:maxLength="13"
+        android:ellipsize="end"
         />
     <TextView
         android:id="@+id/searching_device_address"
@@ -31,7 +32,6 @@
         android:text="(BleAddress)"
         android:textSize="16sp"
         android:textColor="@color/black"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_gravity="center_vertical"
         />
@@ -47,7 +47,6 @@
         android:src="@drawable/arrow"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        />
+        android:contentDescription="@string/add_ble" />
 
 </LinearLayout>

@@ -21,7 +21,9 @@ import android.util.Log;
 
 import com.example.g150s.blecarnmid.ui.activities.ControlActivity;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Administrator on 2017/5/21.
@@ -45,6 +47,10 @@ public class BluetoothLeService extends Service {
     public final static String ACTION_DATA_AVAILABLE = "com.charon.www.NewBluetooth.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA = "com.charon.www.NewBluetooth.EXTRA_DATA";
     public final static String READ_RSSI = "com.charon.www.NewBluetooth.READ_RSSI";
+
+    public List<UUID> writeUuid = new ArrayList<>();
+    public List<UUID> readUuid =new ArrayList<>();
+    public List<UUID> notifyUuid =new ArrayList<>();
 
     private final static String TAG = BluetoothLeService.class.getSimpleName();
     private ControlActivity controlActivity = new ControlActivity();
@@ -143,6 +149,7 @@ public class BluetoothLeService extends Service {
         }
         //controlActivity.invalidateOptionsMenu();
         mBluetoothGatt.disconnect();
+        //mBluetoothGatt = null;
     }
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {//5
@@ -174,7 +181,32 @@ public class BluetoothLeService extends Service {
         // 发现新服务端
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
+                List<BluetoothGattService> supportedGattServices = gatt.getServices();
+
+                for (BluetoothGattService gattService : supportedGattServices) {
+                    List<BluetoothGattCharacteristic> gattCharacteristics = gattService.getCharacteristics();
+                    for (BluetoothGattCharacteristic gattCharacteristic : gattCharacteristics) {
+                        int charaProp = gattCharacteristic.getProperties();
+                        if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
+                            Log.e("nihao", "gattCharacteristic的UUID为:" + gattCharacteristic.getUuid());
+                            Log.e("nihao", "gattCharacteristic的属性为:  可读");
+                            readUuid.add(gattCharacteristic.getUuid());
+                        }
+                        if ((charaProp | BluetoothGattCharacteristic.PROPERTY_WRITE) > 0) {
+                            Log.e("nihao", "gattCharacteristic的UUID为:" + gattCharacteristic.getUuid());
+                            Log.e("nihao", "gattCharacteristic的属性为:  可写");
+                            writeUuid.add(gattCharacteristic.getUuid());
+                        }
+                        if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
+                            Log.e("nihao", "gattCharacteristic的UUID为:" + gattCharacteristic.getUuid() + gattCharacteristic);
+                            Log.e("nihao", "gattCharacteristic的属性为:  具备通知属性");
+                            notifyUuid.add(gattCharacteristic.getUuid());
+                        }
+                    }
+                }
+
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
             }

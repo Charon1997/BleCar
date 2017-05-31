@@ -18,10 +18,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
@@ -58,7 +60,10 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
     private static final int CONNECTING = 2;
     private int currentDegree = 0;
     private int connectFlag = 0;
+    private boolean isClickDisconnect = false;
 
+    private Vibrator vibrator;
+    private static MediaPlayer mp;
 
     private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<>();
 
@@ -76,6 +81,9 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control);
+        mHandler = new Handler();
+        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        mp = MediaPlayer.create(this, R.raw.bibibi);
         initDate();
         initView();
 
@@ -84,9 +92,6 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
         initBle();
 
         initSensor();
-
-
-
 
     }
 
@@ -156,6 +161,7 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
         Intent intent = getIntent();
         mAddress = intent.getStringExtra(MainActivity.ADDRESS);
         mName = intent.getStringExtra(MainActivity.NAME);
+        isClickDisconnect = false;
     }
 
     private void initView() {
@@ -165,7 +171,9 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                if (connectFlag != DISCONNECTED)
+                showNormalDialog(mName);
+                else finish();
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -185,7 +193,30 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
 //        });
     }
 
-
+    private void showNormalDialog(final String name){
+        final AlertDialog.Builder normalDialog =
+                new AlertDialog.Builder(ControlActivity.this);
+        normalDialog.setIcon(R.drawable.car);
+        normalDialog.setTitle("断开连接");
+        normalDialog.setMessage("点击退出，"+name+"将断开连接，是否断开"+name);
+        normalDialog.setPositiveButton("确定",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //...To-do传入数据库，建立连接，退出
+                        writeDate(false);
+                        finish();
+                    }
+                });
+        normalDialog.setNegativeButton("关闭",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+        // 显示
+        normalDialog.show();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -208,17 +239,37 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_connect:
+//        switch (item.getItemId()) {
+//            case R.id.menu_connect:
+//                //连接
+//                connectFlag = CONNECTING;
+//                invalidateOptionsMenu();
+//                mBluetoothLeService.connect(mAddress);
+//                break;
+//            case R.id.menu_disconnect:
+//                //断开
+//                connectFlag = DISCONNECTED;
+//                invalidateOptionsMenu();
+//                mBluetoothLeService.disconnect();
+//                break;
+//        }
+        switch (connectFlag) {
+            case DISCONNECTED:
                 //连接
+                isClickDisconnect = false;
                 connectFlag = CONNECTING;
-                //invalidateOptionsMenu();
+                invalidateOptionsMenu();
                 mBluetoothLeService.connect(mAddress);
                 break;
-            case R.id.menu_disconnect:
-                //断开
+            case CONNECTING:
                 connectFlag = DISCONNECTED;
-                //invalidateOptionsMenu();
+                invalidateOptionsMenu();
+                mBluetoothLeService.disconnect();
+            case CONNECTED:
+                //断开
+                isClickDisconnect = true;
+                connectFlag = DISCONNECTED;
+                invalidateOptionsMenu();
                 mBluetoothLeService.disconnect();
                 break;
         }
@@ -293,20 +344,30 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
             Log.d("123", "action:" + action);
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
                 //displayConnectState("已连接");
+                connectFlag = CONNECTED;
+                if (mp.isPlaying()){
+                    mp.release();
+                }
                 writeDate(true);
                 invalidateOptionsMenu();
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED
                     .equals(action)) {
                 //displayConnectState("未连接");
                 //加入是否可以点击
-                writeDate(false);
-                invalidateOptionsMenu();
+
+                Log.d("123", isClickDisconnect+"isClickDisconnect");
+                if (!isClickDisconnect){
+                    vibrator.vibrate(new long[]{100,2000,500,2500},-1);
+                    mp.start();
+                }
+                closeUi();
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED
                     .equals(action)) {
                 // 搜索需要的uuid
                 initGattCharacteristics(mBluetoothLeService
                         .getSupportedGattServices());
-
+                writeDate(true);
+                Toast.makeText(ControlActivity.this, "发现新services", Toast.LENGTH_SHORT).show();
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
 
             } else if (BluetoothLeService.READ_RSSI.equals(action)) {
@@ -315,36 +376,43 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
         }
     };
 
-    private void writeDate(boolean connect) {
+    private void writeDate(final boolean connect) {
         BluetoothGattCharacteristic characteristic;
-        mHandler = new Handler();
+        Log.d("123", connect+"flag:"+connectFlag+"");
         if (connect && mGattCharacteristics != null) {
-            changeDate(currentDegree);
+            //changeDate(currentDegree);//使用时将其舍去
             for (int i = 0; i < mGattCharacteristics.size(); i++) {
                 for (int j = 0; j < mGattCharacteristics.get(i).size(); j++) {
-                    if (mGattCharacteristics.get(i).get(j).getUuid().toString().equals("92BF01A5-0681-453A-8016-D44DD3E7100B")) {//对应的uuid
+                    if (mGattCharacteristics.get(i).get(j).getUuid().toString().equals("92BF01A5-0681-453A-8016-D44DD3E7100B")) {//对应的uuid  92BF01A5-0681-453A-8016-D44DD3E7100B   0000fff1-0000-1000-8000-00805f9b34fb
                         characteristic = mGattCharacteristics.get(i).get(j);
-                        write(characteristic, new byte[]{(byte) 0xff});//写入的数据
+                        write(characteristic,changeDate(currentDegree));//写入的数据
                         mBluetoothLeService.writeCharacteristic(characteristic);
                         mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
+                                if (connectFlag == CONNECTED)
                                 writeDate(true);
                             }
-                        }, 500);
+                        }, 1000);
                         Log.d("123", "发送数据成功");
                         //Toast.makeText(ControlActivity.this, "发送成功", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
-            Log.d("123", "发送数据失败");
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    writeDate(true);
-                }
-            }, 500);
-        }
+//            Log.d("123", "发送数据假失败");
+//            mHandler.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if (connectFlag == CONNECTED) {
+//                        writeDate(true);
+//                    }
+//                }
+//            }, 1000);
+        } else Log.d("123", "发送数据失败");
+    }
+
+    private byte[] testDate() {
+        return new byte[]{(byte) 0xff,0x00};
     }
 
     private byte[] changeDate(int degree) {
@@ -398,18 +466,25 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
         }
     }
 
+    private void closeUi() {
+        writeDate(false);
+        connectFlag = DISCONNECTED;
+        currentDegree = 0;
+        invalidateOptionsMenu();
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mGattUpdateReceiver);
-        writeDate(false);
-        currentDegree = 0;
+        //closeUi();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mServiceConnection);
+        closeUi();
         mBluetoothLeService = null;
     }
 
