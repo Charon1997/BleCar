@@ -277,7 +277,7 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
                             Log.d(TAG, "mLeScanCallback 搜索结果");
                             //获取到蓝牙设备
                             //可以判断是否添加
-                            if (!mSearchBluetoothList.contains(device)) {
+                            if (!mSearchBluetoothList.contains(device) && !checkAddress(device.getAddress(),0)) {
                                 mSearchBluetoothList.add(device);
                                 Log.d(TAG, "mLeScanCallback 搜索结果   " + device.getAddress());
                             }
@@ -505,7 +505,7 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //...To-do传入数据库，建立连接，退出
-                        if (!checkAddress(address)){
+                        if (!checkAddress(address,1)){
                             bleId++;
                             Log.d("123", bleId+"scan");
                             SharedPreferences.Editor editor = spre.edit();
@@ -599,12 +599,13 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
         dlg.show();
     }
 
-    private boolean checkAddress(String address){
+    private boolean checkAddress(String address,int id){
         if (bleId != 0){
             for (int i = 0;i< bleId;i++){
                 Log.d(TAG, address + spre.getString(ADDRESS + 0, "none"));
                 if (address.equals(mConnectBluetoothList.get(i).getCarAddress()) ){
-                    Toast.makeText(this, "已经添加该设备", Toast.LENGTH_SHORT).show();
+                    if (id == 1)
+                        Toast.makeText(this, "已经添加该设备", Toast.LENGTH_SHORT).show();
                     return true;
                 }
             }

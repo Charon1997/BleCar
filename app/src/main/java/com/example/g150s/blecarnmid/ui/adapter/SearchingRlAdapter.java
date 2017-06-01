@@ -3,6 +3,7 @@ package com.example.g150s.blecarnmid.ui.adapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +42,8 @@ public class SearchingRlAdapter extends RecyclerView.Adapter<SearchingRlAdapter.
     public void onBindViewHolder(ViewHolder holder, final int position) {
       /*  holder.searchingDeviceName.setText(mSearchCars.get(position).getCarName());
         holder.itemView.setTag(mSearchCars.get(position));*/
-        holder.searchingDeviceName.setText(mBluelist.get(position).getName());
+
+        holder.searchingDeviceName.setText(modifyName(mBluelist.get(position).getName()));
         holder.searchingDeviceAddress.setText(mBluelist.get(position).getAddress());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,6 +51,18 @@ public class SearchingRlAdapter extends RecyclerView.Adapter<SearchingRlAdapter.
                 onItemClick(v,mBluelist.get(position),position);
             }
         });
+    }
+
+    private String modifyName(final String oldName) {
+        Log.d("123setName",oldName.length()+"length");
+        int oldNameLength = oldName.length();
+        String newName = oldName;
+        for (int i = 0;i < 14-oldNameLength;i++) {
+            newName = newName + " ";
+            Log.d("123setName",newName.length()+"newlength");
+        }
+        Log.d("123setName",newName.length()+"newlength");
+        return newName;
     }
 
     @Override

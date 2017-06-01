@@ -383,7 +383,7 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
             //changeDate(currentDegree);//使用时将其舍去
             for (int i = 0; i < mGattCharacteristics.size(); i++) {
                 for (int j = 0; j < mGattCharacteristics.get(i).size(); j++) {
-                    if (mGattCharacteristics.get(i).get(j).getUuid().toString().equals("92BF01A5-0681-453A-8016-D44DD3E7100B")) {//对应的uuid  92BF01A5-0681-453A-8016-D44DD3E7100B   0000fff1-0000-1000-8000-00805f9b34fb
+                    if (mGattCharacteristics.get(i).get(j).getUuid().toString().equals("0000fff6-0000-1000-8000-00805f9b34fb")) {//对应的uuid  92BF01A5-0681-453A-8016-D44DD3E7100B   0000fff1-0000-1000-8000-00805f9b34fb
                         characteristic = mGattCharacteristics.get(i).get(j);
                         write(characteristic,changeDate(currentDegree));//写入的数据
                         mBluetoothLeService.writeCharacteristic(characteristic);
