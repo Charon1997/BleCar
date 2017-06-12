@@ -20,6 +20,7 @@ import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.example.g150s.blecarnmid.ui.activities.ControlActivity;
+import com.example.g150s.blecarnmid.ui.activities.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +54,10 @@ public class BluetoothLeService extends Service {
     public List<UUID> notifyUuid =new ArrayList<>();
 
     private final static String TAG = BluetoothLeService.class.getSimpleName();
-    private ControlActivity controlActivity = new ControlActivity();
 
     private final IBinder mBinder = new LocalBinder();
+
+    private ControlActivity controlActivity = new ControlActivity();
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -149,6 +151,7 @@ public class BluetoothLeService extends Service {
         }
         //controlActivity.invalidateOptionsMenu();
         mBluetoothGatt.disconnect();
+
         //mBluetoothGatt = null;
     }
 
@@ -238,6 +241,7 @@ public class BluetoothLeService extends Service {
         }
         @Override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
+            controlActivity.rssi = rssi;
             broadcastUpdate(READ_RSSI);
         }
 
@@ -264,5 +268,6 @@ public class BluetoothLeService extends Service {
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         } else mBluetoothGatt.writeCharacteristic(characteristic);
+
     }
 }

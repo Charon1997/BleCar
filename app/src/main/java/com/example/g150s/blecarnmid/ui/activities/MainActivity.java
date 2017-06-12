@@ -4,6 +4,7 @@ import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,9 +12,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -184,7 +187,7 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
                 != PackageManager.PERMISSION_GRANTED) {
             if (!ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
                     Manifest.permission.READ_CONTACTS)) {
-                showMessageOKCancel("你必须允许这个权限", new DialogInterface.OnClickListener() {
+                showMessageOKCancel("你必须允许这个权限，否则无法搜索到BLE设备", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         ActivityCompat.requestPermissions(MainActivity.this,
@@ -202,12 +205,33 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
     private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
         new AlertDialog.Builder(MainActivity.this)
                 .setMessage(message)
-                .setPositiveButton("OK", okListener)
-                .setNegativeButton("Cancel", null)
+                .setPositiveButton("确定", okListener)
+                .setNegativeButton("关闭", okListener)
                 .create()
                 .show();
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //用户允许改权限，0表示允许，-1表示拒绝 PERMISSION_GRANTED = 0， PERMISSION_DENIED = -1
+                //这里进行授权被允许的处理
+            } else {
+                //这里进行权限被拒绝的处理
+                Toast.makeText(MainActivity.this, "请开启位置权限", Toast.LENGTH_SHORT).show();
+                Intent i = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
 
+                String pkg = "com.android.settings";
+                String cls = "com.android.settings.applications.InstalledAppDetails";
+
+                i.setComponent(new ComponentName(pkg, cls));
+                i.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(i);
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
 
 
     private void initViews() {
@@ -458,11 +482,19 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
         searchLinear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED){
+                    Toast.makeText(MainActivity.this, "请开启位置权限", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent("android.settings.APPLICATION_DETAILS_SETTINGS");
 
-                if (!mBluetoothAdapter.isEnabled() || mBluetoothAdapter == null) {
-                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-                }
+                    String pkg = "com.android.settings";
+                    String cls = "com.android.settings.applications.InstalledAppDetails";
+
+                    i.setComponent(new ComponentName(pkg, cls));
+                    i.setData(Uri.parse("package:" + getPackageName()));
+                    startActivity(i);
+                } else {
                 if (!mScanning) {
                     mSearchBluetoothList.clear();
                     searchingRlAdapter.notifyDataSetChanged();
@@ -490,7 +522,7 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
                     searchText.setText("开始搜索");
                     scanLeDevice(false);
                     progressBar.hide();
-                }
+                }}
             }
         });
     }

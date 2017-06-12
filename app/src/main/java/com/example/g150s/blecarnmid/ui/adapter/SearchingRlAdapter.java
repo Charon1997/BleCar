@@ -43,7 +43,7 @@ public class SearchingRlAdapter extends RecyclerView.Adapter<SearchingRlAdapter.
       /*  holder.searchingDeviceName.setText(mSearchCars.get(position).getCarName());
         holder.itemView.setTag(mSearchCars.get(position));*/
 
-        holder.searchingDeviceName.setText(modifyName(mBluelist.get(position).getName()));
+        holder.searchingDeviceName.setText(mBluelist.get(position).getName());
         holder.searchingDeviceAddress.setText(mBluelist.get(position).getAddress());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,7 +54,7 @@ public class SearchingRlAdapter extends RecyclerView.Adapter<SearchingRlAdapter.
     }
 
     private String modifyName(final String oldName) {
-        Log.d("123setName",oldName.length()+"length");
+        //Log.d("123setName",oldName.length()+"length");
         int oldNameLength = oldName.length();
         String newName = oldName;
         for (int i = 0;i < 14-oldNameLength;i++) {

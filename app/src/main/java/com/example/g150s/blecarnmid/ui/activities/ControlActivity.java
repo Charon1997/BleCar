@@ -34,6 +34,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -62,8 +63,11 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
     private int connectFlag = 0;
     private boolean isClickDisconnect = false;
 
+
     private Vibrator vibrator;
     private static MediaPlayer mp;
+
+    public static int rssi;
 
     private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<>();
 
@@ -74,6 +78,8 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
     private String mAddress;
     private String mName;
 
+    private ImageView mIvCar;
+    private TextView mTvInformation;
     //private TextView mTvConnect;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -178,19 +184,8 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
-//        mTvConnect = (TextView) findViewById(R.id.control_tv);
-//
-//        mTvConnect.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (mTvConnect.getText().toString().equals("未连接")) {
-//                    mBluetoothLeService.connect(mAddress);
-//                } else if (mTvConnect.getText().toString().equals("已连接")) {
-//                    mBluetoothLeService.disconnect();
-//                }
-//            }
-//        });
+        mIvCar = (ImageView) findViewById(R.id.control_img_car);
+        mTvInformation = (TextView) findViewById(R.id.control_tv_information);
     }
 
     private void showNormalDialog(final String name){
@@ -239,20 +234,6 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.menu_connect:
-//                //连接
-//                connectFlag = CONNECTING;
-//                invalidateOptionsMenu();
-//                mBluetoothLeService.connect(mAddress);
-//                break;
-//            case R.id.menu_disconnect:
-//                //断开
-//                connectFlag = DISCONNECTED;
-//                invalidateOptionsMenu();
-//                mBluetoothLeService.disconnect();
-//                break;
-//        }
         switch (connectFlag) {
             case DISCONNECTED:
                 //连接
@@ -328,14 +309,6 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
         return intentFilter;
     }
 
-    private void displayConnectState(final String text) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                //mTvConnect.setText(text);
-            }
-        });
-    }
 
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
         @Override
@@ -371,16 +344,37 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
 
             } else if (BluetoothLeService.READ_RSSI.equals(action)) {
-
+                Log.d(TAG, "rssi:" + rssi);
+                checkRssi(rssi);
             }
         }
     };
 
+    private void checkRssi(int rssi) {
+        if (rssi < 0 && rssi > -70) {
+            mIvCar.setImageResource(R.drawable.car3);
+            mTvInformation.setText("嗯，小车信号满满的哟。");
+        } else if (rssi <= -70 && rssi > -85) {
+            mIvCar.setImageResource(R.drawable.car2);
+            mTvInformation.setText("报告主人，小车信号良好。");
+        } else if (rssi <= -85) {
+            mIvCar.setImageResource(R.drawable.car1);
+            mTvInformation.setText("主人，小车离你有点远了呢。");
+        } else if (rssi == 0) {
+            mIvCar.setImageResource(R.drawable.car0);
+            mTvInformation.setText("小车正在连接哟。");
+        } else if (rssi >= 0) {
+            mIvCar.setImageResource(R.drawable.car0);
+            mTvInformation.setText("哎哟，小车断开连接了哟。");
+        }
+    }
+
     private void writeDate(final boolean connect) {
         BluetoothGattCharacteristic characteristic;
         Log.d("123", connect+"flag:"+connectFlag+"");
+        if (mBluetoothLeService.mBluetoothGatt != null)
+        mBluetoothLeService.mBluetoothGatt.readRemoteRssi();
         if (connect && mGattCharacteristics != null) {
-            //changeDate(currentDegree);//使用时将其舍去
             for (int i = 0; i < mGattCharacteristics.size(); i++) {
                 for (int j = 0; j < mGattCharacteristics.get(i).size(); j++) {
                     if (mGattCharacteristics.get(i).get(j).getUuid().toString().equals("0000fff6-0000-1000-8000-00805f9b34fb")) {//对应的uuid  92BF01A5-0681-453A-8016-D44DD3E7100B   0000fff1-0000-1000-8000-00805f9b34fb
@@ -399,16 +393,17 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
                     }
                 }
             }
-//            Log.d("123", "发送数据假失败");
-//            mHandler.postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (connectFlag == CONNECTED) {
-//                        writeDate(true);
-//                    }
-//                }
-//            }, 1000);
-        } else Log.d("123", "发送数据失败");
+        } else {
+            checkRssi(1);
+            Log.d("123", "发送数据失败");
+        }
+//        mHandler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (connect)
+//                    writeDate(true);
+//            }
+//        }, 1000);
     }
 
     private byte[] testDate() {
@@ -477,7 +472,6 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mGattUpdateReceiver);
-        //closeUi();
     }
 
     @Override
