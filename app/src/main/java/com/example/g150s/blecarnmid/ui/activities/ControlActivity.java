@@ -422,9 +422,6 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
         } else if (ge != 0) {
             bytes = new byte[]{0x41, changeByByte(ge), 0x0D, 0x0A};
         } else bytes = new byte[]{0x41, 0x0D, 0x0A};
-
-
-        //Log.d("123changeDate", Arrays.toString(changeDate(bai)) + Arrays.toString(changeDate(shi)) + Arrays.toString(changeDate(ge)));
         for (byte byteArray : bytes) {
             Log.d("123change", "" + byteArray);
         }
