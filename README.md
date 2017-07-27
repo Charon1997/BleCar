@@ -72,10 +72,10 @@
 
 ## 与小车连接
 
-<img src="./intro_image/演示1jpg" height="500" />
+<img src="./intro_image/演示1.gif" height="500" />
 
 与手机连接
 
-<img src="./intro_image/演示2jpg" height="500" />
+<img src="./intro_image/演示2.gif" height="500" />
 
 转弯、前进等行为
