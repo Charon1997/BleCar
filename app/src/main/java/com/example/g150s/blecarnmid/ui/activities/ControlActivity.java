@@ -12,7 +12,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -35,7 +34,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,12 +42,10 @@ import com.example.g150s.blecarnmid.ble.BluetoothLeService;
 import com.example.g150s.blecarnmid.ui.base.BaseActivity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 /**
- * Created by Administrator on 2017/5/24.
+ * Created by Charon on 2017/5/24.
  */
 
 public class ControlActivity extends BaseActivity implements SensorEventListener {
@@ -80,7 +76,6 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
 
     private ImageView mIvCar;
     private TextView mTvInformation;
-    //private TextView mTvConnect;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -184,8 +179,9 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mIvCar = (ImageView) findViewById(R.id.control_img_car);
         mTvInformation = (TextView) findViewById(R.id.control_tv_information);
+        mIvCar = (ImageView) findViewById(R.id.control_img_car);
+
     }
 
     private void showNormalDialog(final String name){
@@ -351,15 +347,15 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
     };
 
     private void checkRssi(int rssi) {
-        if (rssi < 0 && rssi > -70) {
+        if (rssi < 0 && rssi > -52) {
             mIvCar.setImageResource(R.drawable.car3);
-            mTvInformation.setText("嗯，小车信号满满的哟。");
-        } else if (rssi <= -70 && rssi > -85) {
+            mTvInformation.setText("嗯，小车信号满满的哟。"+rssi);
+        } else if (rssi <= -52 && rssi > -75) {
             mIvCar.setImageResource(R.drawable.car2);
-            mTvInformation.setText("报告主人，小车信号良好。");
-        } else if (rssi <= -85) {
+            mTvInformation.setText("报告主人，小车信号良好。"+rssi);
+        } else if (rssi <= -75) {
             mIvCar.setImageResource(R.drawable.car1);
-            mTvInformation.setText("主人，小车离你有点远了呢。");
+            mTvInformation.setText("主人，小车离你有点远了呢。"+rssi);
         } else if (rssi == 0) {
             mIvCar.setImageResource(R.drawable.car0);
             mTvInformation.setText("小车正在连接哟。");
@@ -387,7 +383,7 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
                                 if (connectFlag == CONNECTED)
                                 writeDate(true);
                             }
-                        }, 1000);
+                        }, 100);
                         Log.d("123", "发送数据成功");
                         //Toast.makeText(ControlActivity.this, "发送成功", Toast.LENGTH_SHORT).show();
                     }

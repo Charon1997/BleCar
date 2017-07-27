@@ -16,11 +16,12 @@
     </RelativeLayout>
 
     <ImageView
-        android:layout_marginTop="64dp"
         android:id="@+id/control_img_car"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:src="@drawable/car0"/>
+        android:layout_marginTop="64dp"
+        android:src="@drawable/car0" />
+
     <TextView
         android:layout_marginTop="64dp"
         android:id="@+id/control_tv_information"
