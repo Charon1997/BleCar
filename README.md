@@ -36,36 +36,46 @@
 
 通过点击按钮进行搜索
 
-<img src="./intro_image/搜索.png" height="500" />
+<img src="./intro_image/搜索.jpg" height="500" />
 
 点击搜索
 
-<img src="./intro_image/搜索2.png" height="500" />
+<img src="./intro_image/搜索2.jpg" height="500" />
 
 正在搜索
 
-<img src="./intro_image/搜索3.png" height="500" />
+<img src="./intro_image/搜索3.jpg" height="500" />
 
 点击搜索设备
 
 ## 设备编辑
 
-<img src="./intro_image/个性化操作.png" height="500" />
+<img src="./intro_image/个性化操作.jpg" height="500" />
 
 可以编辑和删除
 
-<img src="./intro_image/改名字.png" height="500" />
+<img src="./intro_image/改名字.jpg" height="500" />
 
 可以修改其名字
 
 ## 设备连接
 
-<img src="./intro_image/连接2.png" height="500" />
+<img src="./intro_image/连接2.jpg" height="500" />
 
-<img src="./intro_image/连接3.png" height="500" />
+<img src="./intro_image/连接3.jpg" height="500" />
 
 此界面进行连接并给硬件发数据
 
-<img src="./intro_image/连接1.png" height="500" />
+<img src="./intro_image/连接1.jpg" height="500" />
 
 退出连接
+
+## 与小车连接
+
+<img src="./intro_image/演示1jpg" height="500" />
+
+与手机连接
+
+<img src="./intro_image/演示2jpg" height="500" />
+
+转弯、前进等行为
