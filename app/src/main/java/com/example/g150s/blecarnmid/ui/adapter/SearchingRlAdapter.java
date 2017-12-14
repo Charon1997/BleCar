@@ -22,13 +22,11 @@ import java.util.List;
 
 public class SearchingRlAdapter extends RecyclerView.Adapter<SearchingRlAdapter.ViewHolder>  implements OnSearchingItemClickListener{
     private List<BluetoothDevice> mBluelist;
-    private LayoutInflater layoutInflater;
     private OnSearchingItemClickListener mOnItemClickListener = null;
 
     public SearchingRlAdapter(Context context,List<BluetoothDevice> list)
     {
         this.mBluelist = list;
-        layoutInflater = LayoutInflater.from(context);
     }
 
     @Override
@@ -40,9 +38,6 @@ public class SearchingRlAdapter extends RecyclerView.Adapter<SearchingRlAdapter.
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-      /*  holder.searchingDeviceName.setText(mSearchCars.get(position).getCarName());
-        holder.itemView.setTag(mSearchCars.get(position));*/
-
         holder.searchingDeviceName.setText(mBluelist.get(position).getName());
         holder.searchingDeviceAddress.setText(mBluelist.get(position).getAddress());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -98,21 +93,6 @@ public class SearchingRlAdapter extends RecyclerView.Adapter<SearchingRlAdapter.
     public void setOnItemClickListener(OnSearchingItemClickListener onItemClickListener) {
         this.mOnItemClickListener = onItemClickListener;
     }
-//    /* 添加搜索到设备小车 */
-//    public void addItem(Car car,int position)
-//    {
-//        mSearchCars.add(position,car);
-//        notifyItemInserted(position);
-//    }
-//    /* 移除搜索到的设备小车 */
-//    public void removeItem(Car car)
-//    {
-//        int position = mSearchCars.indexOf(car);
-//        mSearchCars.remove(position);
-//        notifyItemRemoved(position);
-//    }
-
-
 
     public boolean isEmpty() {
         return mBluelist.isEmpty();

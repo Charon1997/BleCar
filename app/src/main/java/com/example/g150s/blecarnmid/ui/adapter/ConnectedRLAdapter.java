@@ -1,12 +1,9 @@
 package com.example.g150s.blecarnmid.ui.adapter;
 
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -17,7 +14,6 @@ import com.example.g150s.blecarnmid.R;
 import com.example.g150s.blecarnmid.others.Car;
 import com.example.g150s.blecarnmid.others.OnConnectCreateContextMenu;
 import com.example.g150s.blecarnmid.others.OnConnectItemClickListener;
-import com.example.g150s.blecarnmid.others.OnSearchingItemClickListener;
 import com.example.g150s.blecarnmid.ui.activities.MainActivity;
 
 import java.util.ArrayList;
@@ -28,7 +24,7 @@ import java.util.List;
  */
 
 public class ConnectedRLAdapter extends RecyclerView.Adapter<ConnectedRLAdapter.ViewHolder> implements OnConnectItemClickListener,OnConnectCreateContextMenu{
-    Context mContext;
+    private Context mContext;
     private List<Car> mBluelist = new ArrayList<>();
     private OnConnectItemClickListener mOnItemClickListener = null;
     private OnConnectCreateContextMenu mOnConnectCreateContextMenuListener = null;

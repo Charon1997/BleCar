@@ -1,14 +1,16 @@
 <resources>
-    <string name="app_name">智能跟随车</string>
-    <string name="toolbar_text">智能跟随车</string>
+    <string name="app_name">智能抓药车</string>
+    <string name="toolbar_text">智能抓药车</string>
     <string name="open_scanabled">开放检测</string>
     <string name="open_remark">仅让已配对的设备检测到</string>
     <string name="connected">已添加的设备</string>
     <string name="enabledDevice">可用设备</string>
     <string name="search">搜索设备</string>
+    <string name="scan">扫一扫</string>
     <string name="more">更多</string>
     <string name="menu_disconnect">断开</string>
     <string name="menu_connecting">连接</string>
     <string name="add_ble">添加设备</string>
     <string name="no_add_ble">暂未添加设备</string>
+    <string name="count_time">%1$d秒后停止搜索</string>
 </resources>

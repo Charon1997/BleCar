@@ -4,11 +4,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
-
     <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:src="@drawable/car3"
+        android:layout_centerInParent="true"
+        android:id="@+id/welcome_img_car" />
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:src="@drawable/ble_weclome_img"
+        android:id="@+id/welcome_img_ble"/>
+    <TextView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/ble_weclome_img"
-        android:layout_marginTop="84dp"
-        android:id="@+id/imageView" />
+        android:text="智能抓药车"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:textSize="32sp"
+        android:layout_marginTop="32dp"
+        android:layout_below="@+id/welcome_img_car"/>
 </RelativeLayout>

@@ -241,10 +241,11 @@ public class BluetoothLeService extends Service {
         }
         @Override
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
-            controlActivity.rssi = rssi;
+            ControlActivity.rssi = rssi;
             broadcastUpdate(READ_RSSI);
         }
 
+        @Override
         public void onCharacteristicWrite(BluetoothGatt gatt,
                                           BluetoothGattCharacteristic characteristic, int status) {
             System.out.println("--------write success----- status:" + status);

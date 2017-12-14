@@ -8,5 +8,4 @@ import android.view.View;
 
 public interface OnConnectItemClickListener {
     void onItemClick(View view, Car car);
-
 }
