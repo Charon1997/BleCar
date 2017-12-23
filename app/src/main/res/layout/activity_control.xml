@@ -1,36 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <RelativeLayout
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/control_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/control_toolbar"
-            android:background="?attr/colorPrimary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="25dp"
-            >
-        </android.support.v7.widget.Toolbar>
-    </RelativeLayout>
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:paddingTop="25dp"></android.support.v7.widget.Toolbar>
+
+
 
     <ImageView
         android:id="@+id/control_img_car"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:layout_marginTop="64dp"
+        android:layout_centerInParent="true"
         android:src="@drawable/car0" />
 
+    <LinearLayout
+        android:id="@+id/control_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/control_toolbar"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_margin="8dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/wifi" />
+
+        <TextView
+            android:id="@+id/control_tv_wifi"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:gravity="center"
+            android:text="信号强度：67"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
     <TextView
-        android:layout_marginTop="64dp"
         android:id="@+id/control_tv_information"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="小车蓄势待发"
+        android:layout_below="@id/control_img_car"
+        android:layout_marginTop="32dp"
         android:gravity="center"
-        android:textSize="18sp"
+        android:text="小车蓄势待发"
         android:textColor="@color/black"
-        />
+        android:textSize="18sp"
+        android:visibility="gone" />
+    <LinearLayout
+        android:layout_below="@id/control_ll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:orientation="horizontal">
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/control_et"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:hint="角度"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/control_bt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="确定" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_below="@id/control_ll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/control_et_degree"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:hint="角度"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/control_bt_degree"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="确定" />
+    </LinearLayout>
+    <Button
+        android:id="@+id/control_btn_open"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/control_tv_information"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/btn_down"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:text="一键开盒"
+        android:textSize="18sp" />
+
+
+</RelativeLayout>

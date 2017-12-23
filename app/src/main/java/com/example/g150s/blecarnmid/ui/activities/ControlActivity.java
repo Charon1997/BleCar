@@ -33,16 +33,22 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.g150s.blecarnmid.R;
 import com.example.g150s.blecarnmid.ble.BluetoothLeService;
+import com.example.g150s.blecarnmid.others.SendTread;
 import com.example.g150s.blecarnmid.ui.base.BaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.g150s.blecarnmid.others.Constant.IP;
+import static com.example.g150s.blecarnmid.others.Constant.OPEN_BOX;
 
 /**
  * Created by Charon on 2017/5/24.
@@ -55,12 +61,18 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
     private static final int DISCONNECTED = 0;
     private static final int CONNECTED = 1;
     private static final int CONNECTING = 2;
-    private static final int DELAY_TIME = 50;
+
+    public static void setDelayTime(int delayTime) {
+        DELAY_TIME = delayTime;
+    }
+
+    private static int DELAY_TIME = 50;
+    private int editDegree = 0;
     private int currentDegree = 0;
     private int connectFlag = 0;
     private boolean isClickDisconnect = false;
 
-
+// TODO: 2017/12/23 关盒子再发一个数据 
 
     private Vibrator vibrator;
     private static MediaPlayer mp;
@@ -77,7 +89,12 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
     private String mName;
 
     private ImageView mIvCar;
-    private TextView mTvInformation;
+    private TextView mTvInformation, mTvWifi;
+    private EditText mEt,mEtDegree;
+    private Button mBt, mBtnOpen,mBtnDegree;
+
+    //盒子开关状态
+    private boolean isOpen = false;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -184,7 +201,57 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mTvInformation = (TextView) findViewById(R.id.control_tv_information);
+        mTvWifi = (TextView) findViewById(R.id.control_tv_wifi);
         mIvCar = (ImageView) findViewById(R.id.control_img_car);
+
+        mEtDegree = (EditText) findViewById(R.id.control_et_degree);
+        mEt = (EditText) findViewById(R.id.control_et);
+        mBt = (Button) findViewById(R.id.control_bt);
+        mBtnOpen = (Button) findViewById(R.id.control_btn_open);
+        mBtnDegree = (Button) findViewById(R.id.control_bt_degree);
+
+        mBtnOpen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isOpen = true;
+                new SendTread(OPEN_BOX, IP)
+                        .setSendResultListener(new SendTread.SendResultListener() {
+                                                   @Override
+                                                   public void onSuccess() {
+                                                       Log.d(TAG, "onSuccess");
+                                                       runOnUiThread(new Runnable() {
+                                                           @Override
+                                                           public void run() {
+                                                               mBtnOpen.setText("一键关盒");
+                                                           }
+                                                       });
+                                                   }
+
+                                                   @Override
+                                                   public void onError(String msg) {
+                                                       Log.d(TAG, "onError: " + msg);
+                                                   }
+                                               }
+                        ).start();
+            }
+        });
+
+        mBtnDegree.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                editDegree = Integer.valueOf(mEtDegree.getText().toString());
+            }
+        });
+
+        mBt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String time = mEt.getText().toString();
+                if ("".equals(time)) {
+                    setDelayTime(Integer.valueOf(time));
+                }
+            }
+        });
 
     }
 
@@ -359,15 +426,16 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
     };
 
     private void checkRssi(int rssi) {
+        mTvWifi.setText("信号强度：" + Math.abs(rssi));
         if (rssi < 0 && rssi > -52) {
             mIvCar.setImageResource(R.drawable.car3);
-            mTvInformation.setText("嗯，小车信号满满的哟。" + rssi);
+            mTvInformation.setText("嗯，小车信号满满的哟。");
         } else if (rssi <= -52 && rssi > -75) {
             mIvCar.setImageResource(R.drawable.car2);
-            mTvInformation.setText("报告主人，小车信号良好。" + rssi);
+            mTvInformation.setText("报告主人，小车信号良好。");
         } else if (rssi <= -75) {
             mIvCar.setImageResource(R.drawable.car1);
-            mTvInformation.setText("主人，小车离你有点远了呢。" + rssi);
+            mTvInformation.setText("主人，小车离你有点远了呢。");
         } else if (rssi == 0) {
             mIvCar.setImageResource(R.drawable.car0);
             mTvInformation.setText("小车正在连接哟。");
@@ -398,7 +466,7 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
                                     writeDate(true);
                                 }
                             }
-                        },DELAY_TIME);
+                        }, DELAY_TIME);
                         Log.d("123", "发送数据成功");
                     }
                 }
@@ -407,10 +475,6 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
             checkRssi(1);
             Log.d("123", "发送数据失败");
         }
-    }
-
-    private byte[] testDate() {
-        return new byte[]{(byte) 0xff, 0x00};
     }
 
     private byte[] changeDate(int degree, int rssi) {
@@ -487,9 +551,11 @@ public class ControlActivity extends BaseActivity implements SensorEventListener
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
+        if (event.sensor.getType() == Sensor.TYPE_ORIENTATION && !isOpen) {
             float degree = event.values[0];
             currentDegree = (int) degree;
+        } else {
+            currentDegree = editDegree % 360;
         }
     }
 

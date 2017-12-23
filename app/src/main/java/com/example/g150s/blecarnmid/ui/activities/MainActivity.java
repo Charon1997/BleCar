@@ -41,9 +41,12 @@ import com.example.g150s.blecarnmid.others.Car;
 import com.example.g150s.blecarnmid.others.OnConnectCreateContextMenu;
 import com.example.g150s.blecarnmid.others.OnConnectItemClickListener;
 import com.example.g150s.blecarnmid.others.OnSearchingItemClickListener;
+import com.example.g150s.blecarnmid.others.SendTread;
 import com.example.g150s.blecarnmid.ui.adapter.ConnectedRLAdapter;
 import com.example.g150s.blecarnmid.ui.adapter.SearchingRlAdapter;
 import com.example.g150s.blecarnmid.ui.base.BaseActivity;
+import com.umeng.message.IUmengRegisterCallback;
+import com.umeng.message.PushAgent;
 import com.uuzuche.lib_zxing.activity.CaptureActivity;
 import com.uuzuche.lib_zxing.activity.CodeUtils;
 
@@ -56,6 +59,9 @@ import java.util.TimerTask;
 import kr.co.namee.permissiongen.PermissionFail;
 import kr.co.namee.permissiongen.PermissionGen;
 import kr.co.namee.permissiongen.PermissionSuccess;
+
+import static com.example.g150s.blecarnmid.others.Constant.IP;
+import static com.example.g150s.blecarnmid.others.Constant.UNLOCK;
 
 public class MainActivity extends BaseActivity implements OnConnectCreateContextMenu, MenuItem.OnMenuItemClickListener {
     private List<BluetoothDevice> mSearchBluetoothList = new ArrayList<>();
@@ -137,9 +143,9 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
         mConnectBluetoothList.clear();
         spre = getSharedPreferences(SPRE, MODE_PRIVATE);
         bleId = spre.getInt(ID, 0);
+        Log.d(TAG, "bleId" + bleId);
         if (bleId != 0) {
             for (int i = 1; i <= bleId; i++) {
-                Log.d(TAG, "bleId" + bleId);
                 Car car = new Car(spre.getString(NAME + i, "未命名"), spre.getString(ADDRESS + i, "ErrorAddress"));
                 mConnectBluetoothList.add(car);
             }
@@ -158,7 +164,25 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
         initViews();
 
         initPermission();
+
+        //push();
     }
+
+    private void push() {
+        PushAgent mPushAgent = PushAgent.getInstance(this);
+        mPushAgent.register(new IUmengRegisterCallback() {
+            @Override
+            public void onSuccess(String s) {
+                Log.d(TAG, "onSuccess: "+s);
+            }
+
+            @Override
+            public void onFailure(String s, String s1) {
+                Log.d(TAG, "onFailure: "+s+"   s1:   "+s1);
+            }
+        });
+    }
+
 
     /**
      * 权限加载
@@ -167,7 +191,7 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
         PermissionGen.with(MainActivity.this)
                 .addRequestCode(100)
                 .permissions(
-                        Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CAMERA
+                        Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ).request();
     }
 
@@ -503,7 +527,7 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
                         //...To-do传入数据库，建立连接，退出
                         if (!checkAddress(address, 1)) {
                             bleId++;
-                            Log.d("123", bleId + "scan");
+                            Log.d(TAG, bleId + "scan");
                             SharedPreferences.Editor editor = spre.edit();
                             editor.putString(NAME + bleId, name);
                             editor.putString(ADDRESS + bleId, address);
@@ -674,7 +698,7 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
             editor.putString(ADDRESS + newId, spre.getString(ADDRESS + oldId, "error" + oldId));
             editor.apply();
         }
-        editor.putInt("Id", bleId).commit();
+        editor.putInt(ID, bleId).commit();
     }
 
     @Override
@@ -687,11 +711,29 @@ public class MainActivity extends BaseActivity implements OnConnectCreateContext
                 }
                 if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
                     String result = bundle.getString(CodeUtils.RESULT_STRING);
-                    Toast.makeText(this, "解析结果:" + result, Toast.LENGTH_LONG).show();
+
+                    new SendTread(UNLOCK,IP)
+                            .setSendResultListener(new SendTread.SendResultListener() {
+                        @Override
+                        public void onSuccess() {
+                            Log.d(TAG, "onSuccess");
+                        }
+
+                        @Override
+                        public void onError(String msg) {
+                            Log.d(TAG, "onError"+ msg);
+                        }
+                    }).start();
                 } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
                     Toast.makeText(MainActivity.this, "解析二维码失败", Toast.LENGTH_LONG).show();
                 }
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: "+bleId);
     }
 }

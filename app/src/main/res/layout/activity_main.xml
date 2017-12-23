@@ -175,7 +175,7 @@
                     android:layout_height="22dp"
                     android:layout_gravity="center_horizontal"
                     android:clickable="true"
-                    android:src="@drawable/more" />
+                    android:src="@drawable/scan" />
 
                 <TextView
                     android:layout_width="wrap_content"
